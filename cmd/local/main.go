@@ -1,3 +1,10 @@
+// Package main provides a command-line application for generating a machine learning dataset from category data.
+// This is intended for local use and debugging purposes.
+// It connects to a database, fetches category information, transforms the data according to a predefined configuration,
+// and stores the resulting dataset back into the database.
+// The application uses the `store` package for database interactions and the `transform` package for dataset generation logic.
+// It logs various stages of the process using the `slog` package for structured logging.
+// The application takes configuration parameters for the dataset generation, such as version, shuffle flag, and train/validate/test ratios.
 package main
 
 import (

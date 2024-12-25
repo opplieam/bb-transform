@@ -18,6 +18,11 @@ const (
 	DBDSNParam    string = "BUYBETTER_DEV_SUPABASE_DSN"
 )
 
+// NewDB establishes a new connection to the Postgres SQL database.
+// It retrieves the Data Source Name (DSN) from AWS Systems Manager Parameter Store,
+// opens a database connection using the retrieved DSN, and configures the connection pool.
+// It returns a pointer to the sql.DB object representing the database connection pool
+// or an error if any step fails.
 func NewDB() (*sql.DB, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -46,6 +51,10 @@ func NewDB() (*sql.DB, error) {
 	return db, nil
 }
 
+// getDSN retrieves the Database Source Name (DSN) from AWS Systems Manager Parameter Store.
+// It uses the default AWS configuration and creates an SSM client to fetch the parameter
+// specified by DBDSNParam. The parameter is decrypted before being returned.
+// It returns the DSN string or an error if the retrieval fails.
 func getDSN(ctx context.Context) (string, error) {
 	// Load the default AWS configuration
 	cfg, err := config.LoadDefaultConfig(ctx)

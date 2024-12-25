@@ -1,3 +1,8 @@
+// Package transform provides functionalities to transform raw category data into a structured dataset suitable for machine learning.
+// It handles shuffling, splitting into train/validate/test sets, and database interactions.
+// It utilizes a CategoryStorer interface to abstract the underlying data storage mechanism.
+// The package prepares data specifically for training, validating, and testing machine learning models,
+// enabling the development of models that can predict or classify categories based on input features.
 package transform
 
 import (
@@ -9,6 +14,9 @@ import (
 	"github.com/opplieam/bb-transform/.jetgen/postgres/public/model"
 )
 
+// Config holds the configuration parameters for the transformation process.
+// It includes settings for the dataset version, whether to shuffle the data for randomness,
+// and the ratios for splitting the data into train, validate, and test sets, which are crucial for model training and evaluation.
 type Config struct {
 	Version       string `json:"version"`
 	Shuffle       bool   `json:"shuffle"`
@@ -17,6 +25,9 @@ type Config struct {
 	TestRatio     uint8  `json:"test_ratio"`
 }
 
+// CategoryStorer defines the interface for storing and retrieving category data used in the machine learning pipeline.
+// It provides methods for accessing original and matched categories,
+// cleaning up old datasets based on version, and inserting new datasets, ensuring data consistency and version control.
 type CategoryStorer interface {
 	OriginalCategory() (Category, error)
 	MatchedCategory() ([]model.MatchCategory, error)
@@ -24,11 +35,15 @@ type CategoryStorer interface {
 	InsertDataset(dataset []model.CategoryDataset) error
 }
 
+// CategoryDeepest represents the deepest level of a category, containing its name and its full hierarchical path.
+// This information can be used as labels or features in machine learning models.
 type CategoryDeepest struct {
 	Name string
 	Path string
 }
 
+// Category represents a mapping of category IDs to their corresponding CategoryDeepest information.
+// This mapping is essential for translating between raw data and the structured information used in the dataset.
 type Category map[int32]CategoryDeepest
 
 var (
@@ -44,6 +59,9 @@ type Transform struct {
 	config   Config
 }
 
+// NewTransform creates a new Transform instance, responsible for orchestrating the dataset generation process.
+// It initializes the logger with a "transform" component tag for tracking,
+// sets the CategoryStorer for data access, and configures the transformation process using the provided Config.
 func NewTransform(cs CategoryStorer, cfg Config) *Transform {
 	return &Transform{
 		log:      slog.With("component", "transform"),
@@ -52,6 +70,14 @@ func NewTransform(cs CategoryStorer, cfg Config) *Transform {
 	}
 }
 
+// GenerateDataset generates a dataset specifically designed for training and evaluating machine learning models.
+// It retrieves original and matched categories from the CategoryStorer,
+// optionally shuffles the matched categories to ensure a random distribution of data,
+// splits the data into train, validate, and test sets according to the configured ratios, which is crucial for model training and performance assessment,
+// cleans up previous datasets with the same version from the CategoryStorer to avoid data conflicts,
+// and inserts the newly generated dataset into the CategoryStorer.
+// The resulting dataset contains features (L1-L8) and labels (FullPathOut, NameOut) that can be used to train a model to predict category paths or names.
+// Returns an error if any of the steps fail, using specific error variables for clarity.
 func (t *Transform) GenerateDataset() error {
 	oCat, err := t.catStore.OriginalCategory()
 	if err != nil {
