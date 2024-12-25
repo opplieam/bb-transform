@@ -10,11 +10,11 @@ import (
 )
 
 type Config struct {
-	Version       string
-	Shuffle       bool
-	TrainRatio    uint8
-	ValidateRatio uint8
-	TestRatio     uint8
+	Version       string `json:"version"`
+	Shuffle       bool   `json:"shuffle"`
+	TrainRatio    uint8  `json:"train_ratio"`
+	ValidateRatio uint8  `json:"validate_ratio"`
+	TestRatio     uint8  `json:"test_ratio"`
 }
 
 type CategoryStorer interface {

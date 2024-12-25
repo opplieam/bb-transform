@@ -3,6 +3,7 @@ module github.com/opplieam/bb-transform
 go 1.23.3
 
 require (
+	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go-v2 v1.32.7
 	github.com/aws/aws-sdk-go-v2/config v1.28.7
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.56.2
