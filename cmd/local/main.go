@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/opplieam/bb-transform/internal/transform"
 
@@ -18,10 +19,15 @@ import (
 )
 
 func main() {
-
 	var logger *slog.Logger
 	logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	slog.SetDefault(logger)
+
+	err := godotenv.Load()
+	if err != nil {
+		logger.Error("failed to load environment variables", "error", err)
+		os.Exit(1)
+	}
 
 	logger.Info("connecting to database")
 	db, err := store.NewDB()

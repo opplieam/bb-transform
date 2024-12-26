@@ -1,7 +1,3 @@
-// Package store provides data access and manipulation functionalities for interacting with a database.
-// It includes utilities for establishing database connections, fetching database connection details (DSN) from AWS Systems Manager Parameter Store,
-// and performing operations related to categories using a Postgres SQL database and the Jet library for query building.
-// The package defines a CategoryStore type to encapsulate database operations specifically for category data management.
 package store
 
 import (
