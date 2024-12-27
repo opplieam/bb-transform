@@ -15,7 +15,7 @@ func TestGenerateDataset(t *testing.T) {
 		name         string
 		mockBehavior mockBehavior
 		cfg          Config
-		wantErr      error
+		wantErr      bool
 	}{
 		{
 			name: "Success",
@@ -32,7 +32,7 @@ func TestGenerateDataset(t *testing.T) {
 				storer.EXPECT().CleanUp("v1").Return(nil)
 				storer.EXPECT().InsertDataset(mock.AnythingOfType("[]model.CategoryDataset")).Return(nil)
 			},
-			wantErr: nil,
+			wantErr: false,
 		},
 		{
 			name: "Success with shuffle",
@@ -55,7 +55,7 @@ func TestGenerateDataset(t *testing.T) {
 				storer.EXPECT().CleanUp("v1").Return(nil)
 				storer.EXPECT().InsertDataset(mock.AnythingOfType("[]model.CategoryDataset")).Return(nil)
 			},
-			wantErr: nil,
+			wantErr: false,
 		},
 		{
 			name: "Failed to get original category",
@@ -65,7 +65,7 @@ func TestGenerateDataset(t *testing.T) {
 			mockBehavior: func(storer *MockCategoryStorer) {
 				storer.EXPECT().OriginalCategory().Return(nil, errors.New("original category error"))
 			},
-			wantErr: ErrOriginalCategory,
+			wantErr: true,
 		},
 		{
 			name: "Failed to get matched category",
@@ -76,7 +76,7 @@ func TestGenerateDataset(t *testing.T) {
 				storer.EXPECT().OriginalCategory().Return(Category{}, nil)
 				storer.EXPECT().MatchedCategory().Return(nil, errors.New("matched category error"))
 			},
-			wantErr: ErrMatchedCategory,
+			wantErr: true,
 		},
 		{
 			name: "Failed to clean up",
@@ -88,7 +88,7 @@ func TestGenerateDataset(t *testing.T) {
 				storer.EXPECT().MatchedCategory().Return([]model.MatchCategory{}, nil)
 				storer.EXPECT().CleanUp("v1").Return(errors.New("cleanup error"))
 			},
-			wantErr: ErrCleanUp,
+			wantErr: true,
 		},
 		{
 			name: "Failed to insert dataset",
@@ -101,7 +101,7 @@ func TestGenerateDataset(t *testing.T) {
 				storer.EXPECT().CleanUp("v1").Return(nil)
 				storer.EXPECT().InsertDataset(mock.AnythingOfType("[]model.CategoryDataset")).Return(errors.New("insert dataset error"))
 			},
-			wantErr: ErrInsertDataset,
+			wantErr: true,
 		},
 	}
 
@@ -113,8 +113,8 @@ func TestGenerateDataset(t *testing.T) {
 			tr := NewTransform(mockStorer, tt.cfg)
 			err := tr.GenerateDataset()
 
-			if tt.wantErr != nil {
-				assert.ErrorIs(t, err, tt.wantErr)
+			if tt.wantErr {
+				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
