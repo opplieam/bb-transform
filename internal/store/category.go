@@ -1,5 +1,7 @@
 // Package store provides data access objects and methods for interacting with the database.
 // It includes functionalities for fetching and manipulating category data used in machine learning dataset generation.
+//
+//nolint:typecheck
 package store
 
 import (

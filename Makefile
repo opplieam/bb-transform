@@ -10,6 +10,9 @@ jet-gen:
 test:
 	go test ./... -v
 
+lint:
+	golangci-lint run ./...
+
 # ---------------- Golang Utils End -----------------------------------------
 
 # ---------------- Terraform Start ---------------------------------------
