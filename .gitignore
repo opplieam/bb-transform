@@ -26,4 +26,12 @@ go.work.sum
 .env
 
 .idea
+bin/
 
+terraform/.terraform
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars
+terraform/backend-config.tfvars
+terraform/dummy/*
+bootstrap
+function.zip

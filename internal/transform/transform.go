@@ -6,7 +6,6 @@
 package transform
 
 import (
-	"errors"
 	"log/slog"
 	"math/rand"
 	"time"
@@ -46,13 +45,6 @@ type CategoryDeepest struct {
 // This mapping is essential for translating between raw data and the structured information used in the dataset.
 type Category map[int32]CategoryDeepest
 
-var (
-	ErrOriginalCategory = errors.New("failed to get original category")
-	ErrMatchedCategory  = errors.New("failed to matched category")
-	ErrCleanUp          = errors.New("failed to clean up")
-	ErrInsertDataset    = errors.New("failed to insert dataset")
-)
-
 type Transform struct {
 	log      *slog.Logger
 	catStore CategoryStorer
@@ -81,13 +73,13 @@ func NewTransform(cs CategoryStorer, cfg Config) *Transform {
 func (t *Transform) GenerateDataset() error {
 	oCat, err := t.catStore.OriginalCategory()
 	if err != nil {
-		return ErrOriginalCategory
+		return err
 	}
 	t.log.Info("get all original category")
 
 	mCat, err := t.catStore.MatchedCategory()
 	if err != nil {
-		return ErrMatchedCategory
+		return err
 	}
 	t.log.Info("get all matched category")
 
@@ -134,12 +126,12 @@ func (t *Transform) GenerateDataset() error {
 	}
 
 	if err = t.catStore.CleanUp(t.config.Version); err != nil {
-		return ErrCleanUp
+		return err
 	}
 	t.log.Info("cleaned up dataset", "version", t.config.Version)
 
 	if err = t.catStore.InsertDataset(dataset); err != nil {
-		return ErrInsertDataset
+		return err
 	}
 	t.log.Info("inserted dataset", "version", t.config.Version)
 	return nil
