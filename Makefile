@@ -47,6 +47,7 @@ deploy-lambda:
         --zip-file fileb://$(FUNCTION_PATH) \
         --region $(AWS_REGION)
 
+# TODO: Add alias logic before using publish-lambda
 publish-lambda:
 	for i in $$(seq 1 $(MAX_RETRIES)); do \
 		if aws lambda publish-version \
