@@ -31,6 +31,8 @@ terraform-destroy:
 FUNCTION_NAME := transform-category
 FUNCTION_PATH := ./bin/function.zip
 AWS_REGION := us-east-2
+MAX_RETRIES := 5
+SLEEP_TIME := 10
 
 QUEUE_URL := ${SQS_QUEUE_URL}
 MESSAGE_BODY := '{"version":"v1-lambda","shuffle":true,"train_ratio":60,"validate_ratio":20,"test_ratio":20}'
@@ -46,9 +48,17 @@ deploy-lambda:
         --region $(AWS_REGION)
 
 publish-lambda:
-	aws lambda publish-version \
-        --function-name $(FUNCTION_NAME) \
-        --region $(AWS_REGION)
+	for i in $$(seq 1 $(MAX_RETRIES)); do \
+		if aws lambda publish-version \
+			--function-name $(FUNCTION_NAME) \
+			--region $(AWS_REGION); then \
+			exit 0; \
+		else \
+			echo "Attempt $$i failed. Waiting $(SLEEP_TIME) seconds before retry..."; \
+			sleep $(SLEEP_TIME); \
+		fi; \
+	done; \
+	exit 1
 
 sent-message:
 	aws sqs send-message \
