@@ -38,4 +38,4 @@ jobs:
       - name: Deploy
         run: |
           make deploy-lambda
-          make publish-lambda
+#          make publish-lambda
