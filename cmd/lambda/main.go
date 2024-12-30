@@ -7,7 +7,7 @@
 package main
 
 import (
-	"database/sql"
+	"log"
 	"log/slog"
 	"os"
 
@@ -19,15 +19,6 @@ import (
 
 	_ "github.com/lib/pq"
 )
-
-func initDB() (*sql.DB, error) {
-	db, err := store.NewDB()
-	if err != nil {
-		return nil, err
-	}
-	defer db.Close()
-	return db, nil
-}
 
 func initLogger() *slog.Logger {
 	var logger *slog.Logger
@@ -41,19 +32,18 @@ func initLogger() *slog.Logger {
 	return logger
 }
 
-func main() {
+func run() error {
 	logger := initLogger()
 	err := godotenv.Load()
 	if err != nil {
 		logger.Info("no .env file")
 	}
-
 	logger.Info("connecting to database")
-	db, err := initDB()
+	db, err := store.NewDB()
 	if err != nil {
-		logger.Error("failed to connect to database", "error", err)
-		os.Exit(1)
+		return err
 	}
+	defer db.Close()
 	logger.Info("connected to database")
 
 	cs := store.NewCategoryStore(db)
@@ -74,10 +64,17 @@ func main() {
 		t := transform.NewTransform(logger, cs, tCfg)
 		if err = t.GenerateDataset(); err != nil {
 			logger.Error("failed to generate dataset", "error", err)
-			os.Exit(1)
+			return err
 		}
 	} else {
 		lh := lambdahandler.NewHandler(logger, cs)
 		lambda.Start(lh.HandleSQSEvent)
+	}
+	return nil
+}
+
+func main() {
+	if err := run(); err != nil {
+		log.Fatal(err)
 	}
 }
