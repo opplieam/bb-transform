@@ -38,7 +38,7 @@ QUEUE_URL := ${SQS_QUEUE_URL}
 MESSAGE_BODY := '{"version":"v1-lambda","shuffle":true,"train_ratio":60,"validate_ratio":20,"test_ratio":20}'
 
 build-lambda:
-	GOOS=linux GOARCH=amd64 go build -o ./bin/bootstrap ./cmd/lambda/main.go
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ./bin/bootstrap ./cmd/lambda/main.go
 	zip -j $(FUNCTION_PATH) ./bin/bootstrap
 
 deploy-lambda:
