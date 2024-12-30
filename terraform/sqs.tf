@@ -1,13 +1,3 @@
-variable "sqs_queue_name" {
-  type = string
-  description = "SQS queue name"
-}
-
-variable "sqs_dlq_name" {
-  type = string
-  description = "SQS dead letter queue name"
-}
-
 module "transform_queue_dlq" {
   source  = "terraform-aws-modules/sqs/aws"
   version = "4.2.1"

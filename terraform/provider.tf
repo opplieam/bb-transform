@@ -1,18 +1,3 @@
-variable "region" {
-  type = string
-  description = "AWS region"
-}
-
-variable "bucket" {
-  type = string
-  description = "S3 bucket name"
-}
-
-variable "key" {
-  type = string
-  description = "S3 bucket key"
-}
-
 terraform {
   required_version = ">= 1.10.0"
 
@@ -29,5 +14,5 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-2"
+  region = var.aws_region
 }

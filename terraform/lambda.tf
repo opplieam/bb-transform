@@ -1,13 +1,3 @@
-variable "lambda_function_name" {
-  type = string
-  description = "Lambda function name"
-}
-
-variable "BUYBETTER_DEV_SUPABASE_DSN" {
-  type = string
-  description = "Suppabase DSN environment variable"
-}
-
 module "lambda_function" {
   source  = "terraform-aws-modules/lambda/aws"
   version = "7.17.0"

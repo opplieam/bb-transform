@@ -19,11 +19,11 @@ lint:
 terraform-init:
 	terraform -chdir=terraform/ init -backend-config=backend-config.tfvars
 terraform-plan:
-	terraform -chdir=terraform/ plan -var-file=backend-config.tfvars
+	terraform -chdir=terraform/ plan
 terraform-apply:
-	terraform -chdir=terraform/ apply -auto-approve -var-file=backend-config.tfvars
+	terraform -chdir=terraform/ apply -auto-approve
 terraform-destroy:
-	terraform -chdir=terraform/ destroy -auto-approve -var-file=backend-config.tfvars
+	terraform -chdir=terraform/ destroy -auto-approve
 
 # ---------------- Terraform End -----------------------------------------
 

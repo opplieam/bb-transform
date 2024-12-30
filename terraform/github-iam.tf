@@ -1,9 +1,3 @@
-variable "aws_region" {
-  description = "AWS region"
-  type        = string
-  default     = "us-east-2"
-}
-
 # Get current AWS account ID
 data "aws_caller_identity" "current" {}
 
