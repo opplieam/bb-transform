@@ -1,15 +1,16 @@
 // Package store provides data access objects and methods for interacting with the database.
 // It includes functionalities for fetching and manipulating category data used in machine learning dataset generation.
-//
-//nolint:typecheck
 package store
 
 import (
 	"database/sql"
-
+	//nolint:revive,stylecheck // simulate SQL
 	. "github.com/go-jet/jet/v2/postgres"
+
 	"github.com/opplieam/bb-transform/.jetgen/postgres/public/model"
+	//nolint:revive,stylecheck // simulate SQL
 	. "github.com/opplieam/bb-transform/.jetgen/postgres/public/table"
+
 	"github.com/opplieam/bb-transform/internal/transform"
 )
 

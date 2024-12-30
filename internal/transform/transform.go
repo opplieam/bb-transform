@@ -1,6 +1,6 @@
-// Package transform provides functionalities to transform raw category data into a structured dataset suitable for machine learning.
-// It handles shuffling, splitting into train/validate/test sets, and database interactions.
-// It utilizes a CategoryStorer interface to abstract the underlying data storage mechanism.
+// Package transform provides functionalities to transform raw category data into a structured dataset
+// suitable for machine learning. It handles shuffling, splitting into train/validate/test sets,
+// and database interactions. It utilizes a CategoryStorer interface to abstract the underlying data storage mechanism.
 // The package prepares data specifically for training, validating, and testing machine learning models,
 // enabling the development of models that can predict or classify categories based on input features.
 package transform
@@ -15,7 +15,8 @@ import (
 
 // Config holds the configuration parameters for the transformation process.
 // It includes settings for the dataset version, whether to shuffle the data for randomness,
-// and the ratios for splitting the data into train, validate, and test sets, which are crucial for model training and evaluation.
+// and the ratios for splitting the data into train, validate, and test sets,
+// which are crucial for model training and evaluation.
 type Config struct {
 	Version       string `json:"version"`
 	Shuffle       bool   `json:"shuffle"`
@@ -54,9 +55,9 @@ type Transform struct {
 // NewTransform creates a new Transform instance, responsible for orchestrating the dataset generation process.
 // It initializes the logger with a "transform" component tag for tracking,
 // sets the CategoryStorer for data access, and configures the transformation process using the provided Config.
-func NewTransform(cs CategoryStorer, cfg Config) *Transform {
+func NewTransform(l *slog.Logger, cs CategoryStorer, cfg Config) *Transform {
 	return &Transform{
-		log:      slog.With("component", "transform"),
+		log:      l.With("component", "transform"),
 		catStore: cs,
 		config:   cfg,
 	}
@@ -65,10 +66,12 @@ func NewTransform(cs CategoryStorer, cfg Config) *Transform {
 // GenerateDataset generates a dataset specifically designed for training and evaluating machine learning models.
 // It retrieves original and matched categories from the CategoryStorer,
 // optionally shuffles the matched categories to ensure a random distribution of data,
-// splits the data into train, validate, and test sets according to the configured ratios, which is crucial for model training and performance assessment,
+// splits the data into train, validate, and test sets according to the configured ratios,
+// which is crucial for model training and performance assessment,
 // cleans up previous datasets with the same version from the CategoryStorer to avoid data conflicts,
 // and inserts the newly generated dataset into the CategoryStorer.
-// The resulting dataset contains features (L1-L8) and labels (FullPathOut, NameOut) that can be used to train a model to predict category paths or names.
+// The resulting dataset contains features (L1-L8) and labels (FullPathOut, NameOut)
+// that can be used to train a model to predict category paths or names.
 // Returns an error if any of the steps fail, using specific error variables for clarity.
 func (t *Transform) GenerateDataset() error {
 	oCat, err := t.catStore.OriginalCategory()
@@ -87,25 +90,29 @@ func (t *Transform) GenerateDataset() error {
 		t.log.Info("shuffle matched category")
 
 		src := rand.NewSource(time.Now().UnixNano())
+		//nolint:gosec // No need to use secure random number generator
 		rng := rand.New(src)
 		rng.Shuffle(len(mCat), func(i, j int) {
 			mCat[i], mCat[j] = mCat[j], mCat[i]
 		})
 	}
 
+	const percentage = 100
+
 	// Calculate the number of samples for each label
 	totalSamples := len(mCat)
-	numTrain := int(float64(totalSamples) * (float64(t.config.TrainRatio) / 100))
-	numValidate := int(float64(totalSamples) * (float64(t.config.ValidateRatio) / 100))
+	numTrain := int(float64(totalSamples) * (float64(t.config.TrainRatio) / percentage))
+	numValidate := int(float64(totalSamples) * (float64(t.config.ValidateRatio) / percentage))
 
 	var dataset []model.CategoryDataset
 	var label string
 	for i, v := range mCat {
-		if i < numTrain {
+		switch {
+		case i < numTrain:
 			label = "train"
-		} else if i < numTrain+numValidate {
+		case i < numTrain+numValidate:
 			label = "validate"
-		} else {
+		default:
 			label = "test"
 		}
 
