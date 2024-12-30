@@ -1,7 +1,9 @@
 // Package lambdahandler provides handlers for AWS Lambda functions, specifically designed to process SQS events.
-// It integrates with the `store` and `transform` packages to generate datasets based on configurations received through SQS messages.
-// The package handles unmarshalling of SQS messages into configuration objects, triggers dataset generation, and manages errors during these processes.
-// It's designed to be used in a serverless architecture where an AWS Lambda function is triggered by SQS events to perform data transformation tasks.
+// It integrates with the `store` and `transform` packages to generate datasets
+// based on configurations received through SQS messages. The package handles unmarshalling of SQS messages
+// into configuration objects, triggers dataset generation, and manages errors during these processes.
+// It's designed to be used in a serverless architecture where an AWS Lambda function is triggered by
+// SQS events to perform data transformation tasks.
 package lambdahandler
 
 import (
@@ -29,9 +31,9 @@ type Handler struct {
 // NewHandler creates a new instance of Handler.
 // It takes a CategoryStore instance as a dependency and initializes the logger with a component tag.
 // Returns a pointer to the created Handler.
-func NewHandler(cs *store.CategoryStore) *Handler {
+func NewHandler(l *slog.Logger, cs *store.CategoryStore) *Handler {
 	return &Handler{
-		log: slog.With("component", "lambda"),
+		log: l.With("component", "lambda"),
 		cs:  cs,
 	}
 }
@@ -43,19 +45,19 @@ func NewHandler(cs *store.CategoryStore) *Handler {
 // Returns an error if unmarshalling the configuration or generating the dataset fails.
 func (h *Handler) HandleSQSEvent(ctx context.Context, sqsEvent events.SQSEvent) error {
 	for _, record := range sqsEvent.Records {
-		h.log.Info("processing message", "message_id", record.MessageId)
+		h.log.InfoContext(ctx, "processing message", "message_id", record.MessageId)
 		var cfg transform.Config
 		if err := json.Unmarshal([]byte(record.Body), &cfg); err != nil {
-			h.log.Error("failed to unmarshal config", "error", err)
+			h.log.ErrorContext(ctx, "failed to unmarshal config", "error", err)
 			return ErrUnmarshalConfig
 		}
 
-		t := transform.NewTransform(h.cs, cfg)
+		t := transform.NewTransform(h.log, h.cs, cfg)
 		if err := t.GenerateDataset(); err != nil {
-			h.log.Error("failed to generate dataset", "error", err)
+			h.log.ErrorContext(ctx, "failed to generate dataset", "error", err)
 			return err
 		}
-		h.log.Info("dataset generated successfully", "version", cfg.Version)
+		h.log.InfoContext(ctx, "dataset generated successfully", "version", cfg.Version)
 	}
 	return nil
 }

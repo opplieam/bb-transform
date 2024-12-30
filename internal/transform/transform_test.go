@@ -2,6 +2,8 @@ package transform
 
 import (
 	"errors"
+	"log/slog"
+	"os"
 	"testing"
 
 	"github.com/opplieam/bb-transform/.jetgen/postgres/public/model"
@@ -107,10 +109,13 @@ func TestGenerateDataset(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+			slog.SetDefault(logger)
+
 			mockStorer := NewMockCategoryStorer(t)
 			tt.mockBehavior(mockStorer)
 
-			tr := NewTransform(mockStorer, tt.cfg)
+			tr := NewTransform(logger, mockStorer, tt.cfg)
 			err := tr.GenerateDataset()
 
 			if tt.wantErr {

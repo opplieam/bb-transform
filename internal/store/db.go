@@ -13,11 +13,12 @@ const (
 	DBMaxIdleConn int    = 25
 	DBMaxIdleTime string = "15m"
 	DBDSN         string = "BUYBETTER_DEV_SUPABASE_DSN"
+	DBCtxTimeout         = 5 * time.Second
 )
 
 // NewDB creates a new database connection and configures it with given parameters.
 func NewDB() (*sql.DB, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), DBCtxTimeout)
 	defer cancel()
 
 	// Use IPV4 for AWS lambda

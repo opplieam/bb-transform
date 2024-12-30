@@ -351,6 +351,7 @@ issues:
 
   exclude-dirs:
     - .jetgen/
+    - terraform/
   exclude-files:
     - "_test.go"
 
@@ -359,15 +360,3 @@ issues:
       linters: [ godot ]
     - source: "//noinspection"
       linters: [ gocritic ]
-    - path: "usr/local/Cellar/go/"
-      linters:
-        - typecheck
-    - path: "go/pkg/mod/github.com/go-jet/jet"
-      linters:
-        - typecheck
-    - path: "go/pkg/mod/github.com/stretchr/testify"
-      linters:
-        - typecheck
-    - path: "go/pkg/mod/github.com/lib/pq"
-      linters:
-        - typecheck

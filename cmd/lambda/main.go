@@ -7,6 +7,7 @@
 package main
 
 import (
+	"database/sql"
 	"log/slog"
 	"os"
 
@@ -19,44 +20,64 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func init() {
-	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
-	slog.SetDefault(logger)
+func initDB() (*sql.DB, error) {
+	db, err := store.NewDB()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+	return db, nil
+}
 
+func initLogger() *slog.Logger {
+	var logger *slog.Logger
+	if os.Getenv("DEBUG") == "true" {
+		logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	} else {
+		logger = slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	}
+
+	slog.SetDefault(logger)
+	return logger
+}
+
+func main() {
+	logger := initLogger()
 	err := godotenv.Load()
 	if err != nil {
 		logger.Info("no .env file")
 	}
-}
 
-func main() {
-	slog.Info("connecting to database")
-	db, err := store.NewDB()
+	logger.Info("connecting to database")
+	db, err := initDB()
 	if err != nil {
-		slog.Error("failed to connect to database", "error", err)
+		logger.Error("failed to connect to database", "error", err)
 		os.Exit(1)
 	}
-	defer db.Close()
-	slog.Info("connected to database")
+	logger.Info("connected to database")
 
 	cs := store.NewCategoryStore(db)
 
 	if os.Getenv("ENV") == "dev" {
+		const (
+			trainRatio    = 60
+			validateRatio = 20
+			testRatio     = 20
+		)
 		tCfg := transform.Config{
 			Version:       "v1",
 			Shuffle:       true,
-			TrainRatio:    60,
-			ValidateRatio: 20,
-			TestRatio:     20,
+			TrainRatio:    trainRatio,
+			ValidateRatio: validateRatio,
+			TestRatio:     testRatio,
 		}
-		t := transform.NewTransform(cs, tCfg)
+		t := transform.NewTransform(logger, cs, tCfg)
 		if err = t.GenerateDataset(); err != nil {
-			slog.Error("failed to generate dataset", "error", err)
+			logger.Error("failed to generate dataset", "error", err)
 			os.Exit(1)
 		}
 	} else {
-		lh := lambdahandler.NewHandler(cs)
+		lh := lambdahandler.NewHandler(logger, cs)
 		lambda.Start(lh.HandleSQSEvent)
 	}
-
 }
