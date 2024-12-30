@@ -11,7 +11,7 @@ test:
 	go test ./... -v
 
 lint:
-	golangci-lint run ./...
+	golangci-lint run --config .golangci.yml --verbose
 
 # ---------------- Golang Utils End -----------------------------------------
 
