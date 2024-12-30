@@ -1,8 +1,8 @@
-include .env
+-include .env
 
 # ---------------- Database Start ---------------------------------------
 jet-gen:
-	jet -dsn=${DB_DSN} -path=./.jetgen
+	jet -dsn=${BUYBETTER_DEV_SUPABASE_DSN} -path=./.jetgen
 
 # ---------------- Database End -----------------------------------------
 
